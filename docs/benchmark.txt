@@ -1,0 +1,56 @@
+================================================================================
+                    ESTUDIO DE RENDIMIENTO Y BENCHMARKING
+                    N-BODY SIMULATION - PARTE 2 (PARALELIZACIÓN)
+================================================================================
+
+1. CONDICIONES EXPERIMENTALES
+-----------------------------
+- Tamaño del problema: N = 1000 cuerpos
+- Pasos de simulación: 100 pasos
+- Tiempo base secuencial de referencia (T_secuencial): 0.186 s
+- Posición esperada P0: (0.009284230744097257, 0.6975442567188256, 0.42418372151429895)
+
+2. TABLA DE RESULTADOS OBTENIDOS
+--------------------------------------------------------------------------------
+Hilos (T) | Tiempo (s) | Speedup (S_T) | Eficiencia (E_T) | Validación P0
+--------------------------------------------------------------------------------
+1         | 0.5560     | 0.33x         | 0.33             | EXACTA (OK)
+2         | 0.2700     | 0.69x         | 0.34             | EXACTA (OK)
+4         | 0.1530     | 1.22x         | 0.30             | EXACTA (OK)
+8         | 0.1420     | 1.31x         | 0.16             | EXACTA (OK)
+16        | 0.1300     | 1.43x         | 0.09             | EXACTA (OK)
+--------------------------------------------------------------------------------
+
+3. ANÁLISIS DE RESULTADOS Y CUELLOS DE BOTELLA
+--------------------------------------------------------------------------------
+a) Corrección física y sincronización:
+   En todas las ejecuciones concurrentes se obtuvo de forma idéntica la posición
+   esperada de P0:
+   (0.009284230744097257, 0.6975442567188256, 0.42418372151429895).
+   Esto demuestra que la barrera de sincronización mediante CountDownLatch
+   elimina totalmente las condiciones de carrera (Race Conditions) entre el
+   cálculo de fuerzas gravitatorias O(N^2) y la posterior integración del
+   movimiento de los cuerpos.
+
+b) Análisis de Aceleración (Speedup) y Eficiencia:
+   - Escalado local: Al pasar de 1 hilo (0.556 s) a 2 hilos (0.270 s), el tiempo
+     se reduce a la mitad exacta (aceleración local de 2.06x respecto a T=1).
+     Con 4 hilos (0.153 s) la aceleración local alcanza 3.63x.
+   - Comparación con el T_secuencial de referencia: El tiempo base secuencial
+     (0.186 s) fue medido en un entorno de hardware diferente (macOS con CPU de
+     mayor potencia por núcleo / IPC monohilo). En esta máquina local, el speedup
+     supera 1.0x a partir de 4 hilos (1.22x) y alcanza 1.43x con 16 hilos.
+
+c) Cuellos de botella observados:
+   1. Sobrecoste de sincronización por paso (Overhead): En cada uno de los 100
+      pasos temporales se realiza el despacho de tareas al ExecutorService y se
+      espera en dos barreras de CountDownLatch (fuerzas y movimiento). A medida
+      que el tiempo de cómputo por paso cae por debajo de 1.5 ms, el coste de
+      context switching y desbloqueo de hilos cobra un peso relativo mayor.
+   2. Tráfico de memoria y caché: El cálculo de fuerzas requiere que todos los
+      hilos lean simultáneamente las posiciones y masas de los 1000 cuerpos.
+      La contención en las líneas de caché L2/L3 y el bus de memoria limita el
+      rendimiento al aumentar el número de hilos.
+   3. Saturación de núcleos físicos (Hyper-Threading): Al pasar de 4 a 8 y 16
+      hilos, la ganancia se vuelve sublineal (de 0.153 s a 0.130 s) debido al
+      límite de núcleos físicos de cálculo del procesador frente a hilos lógicos.

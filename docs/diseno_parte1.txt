@@ -1,0 +1,16 @@
+Parte 1 - Justificación del diseño OO
+
+Principios de diseño (GRASP y SOLID):
+
+-La principal diferencia respecto al código inicial es que antes las responsabilidades estaban totalmente mezcladas.
+El dibujado estaba metido dentro de las propias clases que llevaban la física. Para solucionarlo y tener una buena cohesión, se ha quitado todo el codigo gráfico de Body y Universe y se ha separado en la clase NBodySimulator.
+Así cada clase se encarga solo de una cosa: Body guarda los datos físicos y calcula fuerzas, Universe gestiona el conjunto de partículas y su evolución, y NBodySimulator se limita a pintar en pantalla usando StdDraw.
+
+-También se ha buscado mantener un bajo acoplamiento. NBodySimulator no accede directamente a la estructura interna ni a los campos de Body, sino que le pide a Universe la información necesaria mediante el metodo getBodyPosition().
+Así, si en la Parte 2 hay que cambiar algo de la física o de los datos de las partículas, la pantalla no se rompe.
+
+
+Organización de paquetes:
+
+-Para dejar el proyecto limpio y no alterar nada de partida, se ha mantenido el código original tal cual dentro del paquete 'students'.
+Toda la nueva arquitectura orientada a objetos se ha implementado dentro del paquete 'solution'.

@@ -1,0 +1,85 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+package solution {
+
+    class Main {
+        + main(args : String[]) : void
+    }
+
+    class Benchmark {
+        - N : int
+        - STEPS : int
+        - DT : double
+        - T_SECUENCIAL : double
+        + main(args : String[]) : void
+    }
+
+    class NBodySimulator {
+        - universe : Universe
+        - timeStep : double
+        - pauseTime : int
+        - trace : boolean
+        + NBodySimulator(universe : Universe, dt : double, pauseTime : int, doTrace : boolean)
+        + simulate() : void
+        - drawUniverse() : void
+        - createCanvas() : void
+    }
+
+    class Universe {
+        - numBodies : int
+        - radius : double
+        - bodies : Body[]
+        + Universe(fname : String)
+        + update(dt : double) : void
+        + getBodyPosition(i : int) : Vector
+        + getNumBodies() : int
+        + getRadius() : double
+    }
+
+    class UniverseParallel {
+        - numBodies : int
+        - bodies : Body[]
+        - numThreads : int
+        - threadPool : ExecutorService
+        + UniverseParallel(n : int, numThreads : int)
+        + update(dt : double) : void
+        + shutdown() : void
+        + getBody(i : int) : Body
+    }
+
+    class Body {
+        + x : double
+        + y : double
+        + z : double
+        + vx : double
+        + vy : double
+        + vz : double
+        + fx : double
+        + fy : double
+        + fz : double
+        + mass : double
+        + Body(x : double, y : double, z : double, vx : double, vy : double, vz : double, mass : double)
+    }
+
+    class Vector {
+        - data : double[]
+        + Vector(data : double[])
+        + cartesian(i : int) : double
+        + plus(b : Vector) : Vector
+        + minus(b : Vector) : Vector
+        + scale(alpha : double) : Vector
+        + magnitude() : double
+        + direction() : Vector
+        + toString() : String
+    }
+
+    Main --> Universe
+    Main --> NBodySimulator
+    Benchmark --> UniverseParallel
+    NBodySimulator --> Universe
+    Universe "1" *-- "1..*" Body
+    UniverseParallel "1" *-- "1..*" Body
+    Body --> Vector
+}
+@enduml

@@ -1,0 +1,9 @@
+Datos de referencia - Parte 1 (Ejecución Secuencial)
+
+Configuración: N = 1000, 100 pasos
+
+- Tiempo base secuencial (T_secuencial): 0.186 s
+- Posición final del cuerpo P0: (0.009284230744097257, 0.6975442567188256, 0.42418372151429895)
+
+Nota para la Parte 2:
+La versión paralela debe obtener estas mismas coordenadas exactas para P0 para verificar que no hay condiciones de carrera en el cálculo físico.
